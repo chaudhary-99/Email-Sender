@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const SendEmailForm = () => {
   const [formData, setFormData] = useState({
@@ -8,14 +9,8 @@ const SendEmailForm = () => {
     receiverEmail: '',
   });
   
-  const [emailDesign, setEmailDesign] = useState({});
-
-  useEffect(() => {
-    const design = localStorage.getItem('emailDesign');
-    if (design) {
-      setEmailDesign(JSON.parse(design));
-    }
-  }, []);
+  const location = useLocation();
+  const emailDesign = location.state?.emailDesign || {};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
