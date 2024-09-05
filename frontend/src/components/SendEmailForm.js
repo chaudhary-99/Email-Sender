@@ -1,5 +1,7 @@
+// src/components/SendEmailForm.js
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import EmailPreviewer from './EmailPreviewer';
 
 const SendEmailForm = () => {
   const [formData, setFormData] = useState({
@@ -8,7 +10,7 @@ const SendEmailForm = () => {
     receiverName: '',
     receiverEmail: '',
   });
-  
+
   const location = useLocation();
   const emailDesign = location.state?.emailDesign || {};
 
@@ -43,76 +45,67 @@ const SendEmailForm = () => {
   };
 
   return (
-    <div className="email-form">
-      <h2>Send Email</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="senderEmail">Sender's Email</label>
-          <input
-            id="senderEmail"
-            name="senderEmail"
-            type="email"
-            required
-            value={formData.senderEmail}
-            onChange={handleChange}
-          />
+    <div className="email-form-container">
+      <h2 className="form-title">Send Your Email</h2>
+      <form className="email-form" onSubmit={handleSubmit}>
+        <div className="form-section">
+          <h3>Sender Details</h3>
+          <div className="form-group">
+            <label htmlFor="senderEmail">Sender's Email</label>
+            <input
+              id="senderEmail"
+              name="senderEmail"
+              type="email"
+              required
+              value={formData.senderEmail}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="senderPassword">Sender's Password</label>
+            <input
+              id="senderPassword"
+              name="senderPassword"
+              type="password"
+              required
+              value={formData.senderPassword}
+              onChange={handleChange}
+            />
+          </div>
         </div>
-        <div className="form-group">
-          <label htmlFor="senderPassword">Sender's Password</label>
-          <input
-            id="senderPassword"
-            name="senderPassword"
-            type="password"
-            required
-            value={formData.senderPassword}
-            onChange={handleChange}
-          />
+
+        <div className="form-section">
+          <h3>Receiver Details</h3>
+          <div className="form-group">
+            <label htmlFor="receiverName">Receiver's Name</label>
+            <input
+              id="receiverName"
+              name="receiverName"
+              type="text"
+              required
+              value={formData.receiverName}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="receiverEmail">Receiver's Email</label>
+            <input
+              id="receiverEmail"
+              name="receiverEmail"
+              type="email"
+              required
+              value={formData.receiverEmail}
+              onChange={handleChange}
+            />
+          </div>
         </div>
-        <div className="form-group">
-          <label htmlFor="receiverName">Receiver's Name</label>
-          <input
-            id="receiverName"
-            name="receiverName"
-            type="text"
-            required
-            value={formData.receiverName}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="receiverEmail">Receiver's Email</label>
-          <input
-            id="receiverEmail"
-            name="receiverEmail"
-            type="email"
-            required
-            value={formData.receiverEmail}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit">Send Email</button>
+
+        <button type="submit" className="btn primary-btn">
+          Send Email
+        </button>
       </form>
 
-      <div className="email-preview">
-        <h3>Preview</h3>
-        <div className="email-content">
-          <h4>Subject: {emailDesign.emailSubject}</h4>
-          <p>{emailDesign.emailBody}</p>
-          <p>Best regards,</p>
-          <p>{emailDesign.senderName}</p>
-          <p>{emailDesign.senderDepartment}</p>
-          <p>{emailDesign.senderInstitution}</p>
-          {emailDesign.linkedinProfile && (
-            <p>LinkedIn: <a href={emailDesign.linkedinProfile}>{emailDesign.linkedinProfile}</a></p>
-          )}
-          {emailDesign.githubProfile && (
-            <p>GitHub: <a href={emailDesign.githubProfile}>{emailDesign.githubProfile}</a></p>
-          )}
-          {emailDesign.facebookProfile && (
-            <p>Facebook: <a href={emailDesign.facebookProfile}>{emailDesign.facebookProfile}</a></p>
-          )}
-        </div>
-      </div>
+      <EmailPreviewer formData={emailDesign} />
     </div>
   );
 };

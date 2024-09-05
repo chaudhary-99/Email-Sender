@@ -69,7 +69,7 @@ def handle_send_email():
     email_data = {
         'receiverName': data['receiverName'],
         'receiverEmail': data['receiverEmail'],
-        'companyName': data['companyName'],
+        # 'companyName': data['companyName'],
         'emailSubject': data['emailSubject'],
         'emailBody': data['emailBody'],
         'senderName': data['senderName'],
