@@ -1,18 +1,22 @@
-// src/components/EmailPreviewer.js
 import React from 'react';
 
-const EmailPreviewer = ({ formData }) => {
+const EmailPreviewer = ({ formData, emailBody }) => {
   return (
     <div className="email-preview">
       <h3>Email Preview</h3>
       <div className="email-content">
-        <p>Dear {formData.receiverName || 'Receiver'},</p>
-        <p>{formData.emailBody || 'This is the body of the email.'}</p>
-        <br />
-        <br />
-        <table className="signature-table" style={{width:'auto'}}>
-          <tbody >
-            <tr >
+        <p style={{ whiteSpace: 'pre-line' }}>
+          {/* Render the email body with HTML content (e.g., span elements for placeholders) */}
+          <div
+            dangerouslySetInnerHTML={{
+              __html: emailBody || formData.emailBody || `Dear ${formData.receiverName || 'Receiver'},\nThis is the body of the email.`,
+            }}
+          />
+        </p>
+
+        <table className="signature-table" style={{ width: 'auto' }}>
+          <tbody>
+            <tr>
               <td className="signature-logo">
                 <img
                   src={

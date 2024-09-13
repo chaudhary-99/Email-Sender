@@ -6,6 +6,8 @@ import SendEmailForm from './components/SendEmailForm';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import './App.css';
+import CsvReader from './components/CsvReader';
+import Sendemailcsv from './components/Sendemailcsv';
 
 const App = () => {
   return (
@@ -16,6 +18,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={<DesignEmailForm />} />
             <Route path="/send" element={<SendEmailForm />} />
+            <Route path="/csv" element={<CsvReader />} />
+            <Route path="/csvsend" element={<Sendemailcsv />} />
           </Routes>
         </main>
         <Footer />

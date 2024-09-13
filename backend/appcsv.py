@@ -3,7 +3,9 @@ from flask_cors import CORS
 import smtplib
 from email.message import EmailMessage
 import ssl
-paths = ssl.get_default_verify_paths()
+import pandas as pd
+import re
+from io import StringIO
 
 app = Flask(__name__)
 CORS(app)
@@ -16,7 +18,7 @@ def send_email(sender_email, sender_password, email_data):
 
     formatted_email_body = email_data['emailBody'].replace('\n', '<br>')
 
-    # Create HTML body
+    # Create HTML body with signature
     html_body = f"""
     <html>
     <body>
@@ -50,7 +52,7 @@ def send_email(sender_email, sender_password, email_data):
 
     msg.set_content(html_body, subtype='html')
 
-    context = ssl._create_unverified_context()
+    context = ssl.create_default_context()
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
@@ -62,32 +64,56 @@ def send_email(sender_email, sender_password, email_data):
         print(f"Error sending email to {email_data['receiverName']}: {e}")
         return False
 
-@app.route('/send-email', methods=['POST'])
-def handle_send_email():
-    data = request.get_json()
-    sender_email = data['senderEmail']
-    sender_password = data['senderPassword']
-    
-    email_data = {
-        'receiverName': data['receiverName'],
-        'receiverEmail': data['receiverEmail'],
-        # 'companyName': data['companyName'],
-        'emailSubject': data['emailSubject'],
-        'emailBody': data['emailBody'],
-        'senderName': data['senderName'],
-        'senderDepartment': data['senderDepartment'],
-        'senderInstitution': data['senderInstitution'],
-        'linkedinProfile': data['linkedinProfile'],
-        'githubProfile': data['githubProfile'],
-        'facebookProfile': data['facebookProfile'],
+def replace_placeholders(template, row):
+    # Replace placeholders in curly braces with corresponding row values
+    placeholders = re.findall(r'\{(.*?)\}', template)
+    for placeholder in placeholders:
+        template = template.replace(f'{{{placeholder}}}', str(row[placeholder]))
+    return template
+
+@app.route('/send-emails-from-csv', methods=['POST'])
+def handle_send_emails_from_csv():
+    sender_email = request.form['senderEmail']
+    sender_password = request.form['senderPassword']
+    email_subject = request.form['emailSubject']
+    email_body_template = request.form['emailBody']
+    email_column = request.form['emailColumn']
+
+    file = request.files['csvFile']
+    csv_data = pd.read_csv(StringIO(file.read().decode('utf-8')))
+
+    sender_info = {
+        'senderName': request.form['senderName'],
+        'senderDepartment': request.form['senderDepartment'],
+        'senderInstitution': request.form['senderInstitution'],
+        'linkedinProfile': request.form['linkedinProfile'],
+        'githubProfile': request.form['githubProfile'],
+        'facebookProfile': request.form['facebookProfile']
     }
 
-    success = send_email(sender_email, sender_password, email_data)
-    
-    if success:
-        return jsonify({'message': 'Email sent successfully!'})
-    else:
-        return jsonify({'message': 'Failed to send email'}), 500
+    success_count = 0
+    failure_count = 0
+
+    for index, row in csv_data.iterrows():
+        email_body = replace_placeholders(email_body_template, row)
+
+        email_data = {
+            'receiverName': row.get('Name', 'Valued Customer'),
+            'receiverEmail': row[email_column],
+            'emailSubject': email_subject,
+            'emailBody': email_body,
+            **sender_info
+        }
+
+        success = send_email(sender_email, sender_password, email_data)
+        if success:
+            success_count += 1
+        else:
+            failure_count += 1
+
+    return jsonify({
+        'message': f'Emails sent successfully: {success_count}, Failed: {failure_count}'
+    }), 200 if success_count > 0 else 500
 
 if __name__ == '__main__':
     app.run(debug=True)
